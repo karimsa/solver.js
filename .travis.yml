@@ -11,7 +11,5 @@ deploy:
   on:
     tags: true
     repo: karimsa/solver.js
-    branches:
-      only:
-        - master
+    branch: master
 script: npm run report-coverage
