@@ -1,0 +1,14 @@
+language: node_js
+node_js: 0.1
+addons:
+  code_climate:
+    repo_token: 01a2e37b8548d57387d3aa592a36241a0f403503fbd38730ed5a630e57fb722b
+deploy:
+  provider: npm
+  email: k4rim.sa@gmail.com
+  api_key:
+    secure: Dtr5hMKCLLuEnkHfLuL6eStLpJhJ9wAOiFENmj75fsS8Z2mN1rFJbReBgTxjHGexD5/+nXqSbmbt/0j/AIAJyi8REi9XXNaEpf6TwF4+t/tTtIMJ8JM+scv1FtA0vk251jbzyg5XjU7KVY1JIHhE6CZd64PJgcGtr8dlNVZ5TWM=
+  on:
+    tags: true
+    repo: karimsa/solver.js
+script: npm run report-coverage
