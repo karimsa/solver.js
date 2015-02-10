@@ -3,6 +3,7 @@
  * Licensed under GPLv2.
  * Copyright (C) 2015 Karim Alibhai.
  **/
+/*jslint evil:true*/
 
 (function () {
     "use strict";
@@ -26,6 +27,9 @@
                 };
             }
         },
+        int = function (n) {
+            return Math.round(+n);
+        },
         perfect = function (type, x, fx) {
             return function (t) {
                 t.plan(1 + reqs[type].length);
@@ -38,7 +42,7 @@
                         var i;
 
                         for (i = 0; i < reqs[type].length; i += 1) {
-                            t.equal(sol[reqs[type][i]], fx[reqs[type][i]], 'verify ' + reqs[type][i]);
+                            t.equal(int(sol[reqs[type][i]]), fx[reqs[type][i]], 'verify ' + reqs[type][i]);
                         }
                     });
             };
@@ -48,12 +52,46 @@
         },
         deep = function (type, fx) {
             return perfect(type, solver.data.continuous(1, 8, 2), fx);
+        },
+        guess = function (type, flow, fx) {
+            var x = flow === 'continuous' ? solver.data.continuous(1, 8, 2) : solver.data.discrete(1, 8);
+
+            return function (t) {
+                t.plan(1 + reqs[type].length);
+
+                solver
+                    .eq('x', x)
+                    .add('y', x.map(Fns[type](fx)))
+                    .solve('y', 'guess', function (sol) {
+                        t.ok(true, 'reached stream callback');
+                        var i;
+
+                        for (i = 0; i < reqs[type].length; i += 1) {
+                            t.equal(int(sol[reqs[type][i]]), fx[reqs[type][i]], 'verify ' + reqs[type][i]);
+                        }
+                    });
+            };
         };
 
     // precision of 5 feels good
     solver.setPrecision(5);
 
     // MATH EXTENSION TESTS
+    test('Number#isNumber()', function (t) {
+        t.plan(3);
+
+        t.equal(Number.isNumber(4), true, '4 is a number');
+        t.equal(Number.isNumber('4'), false, '"4" is not a number');
+        t.equal(Number.isNumber(null), false, 'null is not a number');
+    });
+
+    test('Number#areNumbers()', function (t) {
+        t.plan(2);
+
+        t.equal(Number.areNumbers(4, 8, 16), true, '4,8,16 are numbers');
+        t.equal(Number.areNumbers(4, "8", 16), false, '4,"8",16 are not numbers');
+    });
+
     test('test number to fraction', function (t) {
         t.plan(3);
         var f = solver.math.fraction(0.5);
@@ -178,6 +216,25 @@
         t.equal(ds.summary().Q[2], 2.5, 'median is correct');
     });
 
+    test('solve supercalifragilisticexpialidocious', function (t) {
+        t.plan(1);
+
+        var ds = solver.Dataset();
+
+        ds.add('x', [1, 2, 3, 4]);
+        ds.add('y', [1, 2, 3, 4]);
+
+        t.throws(function () {
+            ds.createSolver({
+                indep: 'y',
+                dep: 'x',
+                type: 'supercalifragilisticexpialidocious'
+            }, function () {
+                t.fail('THIS IS DARK MAGIC.');
+            });
+        }, false, 'threw error');
+    });
+
     // LINEAR ALGORITHM TESTS
     test('try solving y = 2x + 2', deep('linear', {
         m: 2,
@@ -246,5 +303,26 @@
     test('try solving y = 3x^4', shallow('exponential', {
         a: 3,
         n: 4
+    }));
+
+    // GUESS TESTS
+    test('try guessing y = -3x + 4', guess('linear', 'continuous', {
+        m: -3,
+        b: 4
+    }));
+
+    test('try guessing y = -3x + 4', guess('linear', 'discrete', {
+        m: -3,
+        b: 4
+    }));
+
+    test('try guessing y = 9x^3', guess('exponential', 'continuous', {
+        a: 9,
+        n: 3
+    }));
+
+    test('try guessing y = 9x^3', guess('exponential', 'discrete', {
+        a: 9,
+        n: 3
     }));
 }());
