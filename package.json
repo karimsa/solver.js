@@ -28,7 +28,7 @@
   "license": "GPL",
   "dependencies": {
     "fractional": "~1.0.0",
-    "event-stream": "~3.1.7"
+    "map-stream": "0.0.5"
   },
   "devDependencies": {
     "codeclimate-test-reporter": "0.0.4",
