@@ -25,6 +25,7 @@
             eq: require('./lib/eq.js'),
             math: require('./lib/math.js'),
             solve: require('./lib/eq/solvers/index.js'),
+            probability: require('./lib/probability.js'),
             Dataset: require('./lib/dataset.js')
         };
 
