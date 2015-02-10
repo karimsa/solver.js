@@ -54,7 +54,7 @@
             return perfect(type, solver.data.continuous(1, 8, 2), fx);
         },
         guess = function (type, flow, fx) {
-            var x = flow === 'continuous' ? solver.data.continuous(1, 8, 2) : solver.data.discrete(1, 8);
+            var x = flow === 'continuous' ? solver.data.continuous(1, 15, 2) : solver.data.discrete(1, 15);
 
             return function (t) {
                 t.plan(1 + reqs[type].length);
@@ -306,22 +306,22 @@
     }));
 
     // GUESS TESTS
-    test('try guessing y = -3x + 4', guess('linear', 'continuous', {
+    test('try continuous guessing y = -3x + 4', guess('linear', 'continuous', {
         m: -3,
         b: 4
     }));
 
-    test('try guessing y = -3x + 4', guess('linear', 'discrete', {
+    test('try discrete guessing y = -3x + 4', guess('linear', 'discrete', {
         m: -3,
         b: 4
     }));
 
-    test('try guessing y = 9x^3', guess('exponential', 'continuous', {
+    test('try continuous guessing y = 9x^3', guess('exponential', 'continuous', {
         a: 9,
         n: 3
     }));
 
-    test('try guessing y = 9x^3', guess('exponential', 'discrete', {
+    test('try discrete guessing y = 9x^3', guess('exponential', 'discrete', {
         a: 9,
         n: 3
     }));
