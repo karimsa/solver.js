@@ -4,7 +4,7 @@
   "description": "tools for processing collected data",
   "main": "index.js",
   "engines": {
-    "node": ">= 0.10.0"
+    "node": "0.12.x"
   },
   "scripts": {
     "pretest": "gulp",
