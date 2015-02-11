@@ -325,4 +325,86 @@
         a: 9,
         n: 3
     }));
+
+    // PROBABILTY TESTS
+    test('discover the probability of a coin toss', function (t) {
+        t.plan(3);
+        var i, prob = solver.probability.simple();
+
+        for (i = 0; i < 16; i += 1) {
+            prob.emit(Math.random() <= 0.5 ? 'h' : 't');
+        }
+
+        t.equal(1 - prob.P('t'), prob.P('h'), 'heads opposite to tails');
+        t.equal(1 - prob.P('h'), prob.P('t'), 'tails opposite to heads');
+        t.equal(prob.P('ducks'), 0, 'ducks are 0%');
+    });
+
+    test('stream-based coin toss', function (t) {
+        t.plan(26);
+
+        var n = 10,
+            match_tested = false,
+
+            // if it contains 'h', assume heads
+            // if it contains 't', assume tails
+            // otherwise: unknown
+            prob = solver.probability.map(['h', 't'], function (a, x) {
+                if (!match_tested) {
+                    t.ok(true, 'probability matcher called');
+                    match_tested = true;
+                }
+
+                return a.indexOf(x) !== -1;
+            }),
+
+            // possible events (unrelated to coins, I know)
+            events = ['horses', 'tigers', 'javascript'],
+
+            // this will trigger events asynchronously over a stream
+            // we will conduct tests on the resulting probability streams
+            // as well as synchronous probability tests
+            next = function () {
+                n -= 1;
+
+                if (n) {
+                    // trigger any of the above events
+                    prob.stream.write([events[Math.round(Math.random() * (events.length - 1))]]);
+
+                    // continue asynchronously
+                    process.nextTick(next);
+                } else {
+                    // let's try a frequency map as well
+                    prob.stream.write({
+                        horses: 1
+                    });
+
+                    // events are done, do a quick synchronous test
+                    t.ok(prob.P('tails') > 0, 'tails happened');
+                    t.equal(Math.log(prob.P('heads') / 1000), Math.log((1 - prob.P('tails')) / 1000), 'heads is the opposite of tail');
+                    t.equal(prob.P('random'), 0, 'random event did not happen');
+                }
+            };
+
+        // emitting is forbidden for mapped
+        // probability
+        t.throws(function () {
+            prob.emit('I throw errors at a daily basis.');
+        }, false, 'emit throws error');
+
+        // no probabilities, rather than NaN
+        t.equal(+prob.P('heads'), 0, 'probability of 0 before events');
+
+        // prepare probability streams for tests
+        prob.getStream('heads').on('data', function (PofH) {
+            t.equal(Math.round(PofH * 10), Math.round((1 - prob.P('tails')) * 10), 'heads happened (in stream)');
+        });
+
+        prob.getStream('tails').on('data', function (PofT) {
+            t.ok(Number.isNumber(PofT), 'tails happened (in stream)');
+        });
+
+        // begin streaming events
+        next();
+    });
 }());
