@@ -95,8 +95,8 @@
     test('test number to fraction', function (t) {
         t.plan(3);
         var f = solver.math.fraction(0.5);
-        t.equal(f.numerator, 1, 'verify numerator');
-        t.equal(f.denominator, 2, 'verify denominator');
+        t.equal(f.n, 1, 'verify numerator');
+        t.equal(f.d, 2, 'verify denominator');
         t.equal(+f, 0.5, 'verify numerical value');
     });
 
